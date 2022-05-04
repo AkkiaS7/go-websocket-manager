@@ -3,6 +3,7 @@ package wsmgr
 import (
 	"github.com/AkkiaS7/go-websocket-mgr/wsmgr/conf"
 	"log"
+	"sync"
 )
 
 type RequestHandlerFunc func(*Request)
@@ -10,7 +11,9 @@ type RequestHandlerFunc func(*Request)
 type RequestHandler struct {
 	WorkerList     map[uint64]*ReqWorker // Worker列表
 	WorkerPoolSize uint64                //工作池的worker数量
-	mgr            *Mgr                  //隶属的websocket管理器
+	Lock           sync.RWMutex
+
+	mgr *Mgr //隶属的websocket管理器
 }
 
 type ReqWorker struct {
@@ -28,6 +31,11 @@ func NewRequestHandler(mgr *Mgr) *RequestHandler {
 	}
 }
 
+//Start 启动请求处理器
+func (rh *RequestHandler) Start() {
+	rh.StartWorker()
+}
+
 //StartWorker 启动worker工作池
 func (rh *RequestHandler) StartWorker() {
 	for i := uint64(0); i < rh.WorkerPoolSize; i++ {
@@ -42,7 +50,9 @@ func (rh *RequestHandler) StartOneWorker(id uint64) {
 		rh:       rh,
 		ReqQueue: make(chan *Request, conf.WorkerReqQueueSize),
 	}
+	rh.Lock.Lock()
 	rh.WorkerList[id] = worker
+	rh.Lock.Unlock()
 	for {
 		select {
 		case req := <-worker.ReqQueue:
@@ -53,6 +63,7 @@ func (rh *RequestHandler) StartOneWorker(id uint64) {
 				continue
 			}
 			// 调用路由
+			log.Println("路由调用", req.CMD)
 			handleFunc(req)
 		}
 	}

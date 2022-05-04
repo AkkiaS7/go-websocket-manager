@@ -10,23 +10,23 @@ type IRouter interface {
 	Get(pattern string) (RequestHandlerFunc, bool)
 }
 
-type Router struct {
+type RouterGroup struct {
 	routes map[string]RequestHandlerFunc
 }
 
 // Add a route to the router
-func (r *Router) Add(pattern string, handler RequestHandlerFunc) {
+func (r *RouterGroup) Add(pattern string, handler RequestHandlerFunc) {
 	r.routes[pattern] = handler
 }
 
 // Get a route from the router
-func (r *Router) Get(pattern string) (RequestHandlerFunc, bool) {
+func (r *RouterGroup) Get(pattern string) (RequestHandlerFunc, bool) {
 	handler, ok := r.routes[pattern]
 	return handler, ok
 }
 
-func NewRouter() *Router {
-	return &Router{
+func NewRouter() *RouterGroup {
+	return &RouterGroup{
 		routes: make(map[string]RequestHandlerFunc),
 	}
 }

@@ -2,6 +2,7 @@ package wsmgr
 
 import (
 	"errors"
+	"github.com/AkkiaS7/go-websocket-mgr/wsmgr/conf"
 	"github.com/gorilla/websocket"
 	"log"
 	"sync"
@@ -17,6 +18,20 @@ type Connection struct {
 	msgChan      chan *[]byte           //当前链接的消息管道
 	property     map[string]interface{} //当前链接的额外属性
 	propertyLock sync.RWMutex
+}
+
+func NewConnection(conn *websocket.Conn, connID uint64, msgHandler *MsgHandler, connMgr *ConnManager) *Connection {
+	c := &Connection{
+		Conn:       conn,
+		ConnID:     connID,
+		CloseChan:  make(chan bool, 1),
+		MsgHandler: msgHandler,
+		ConnMgr:    connMgr,
+		isClosed:   false,
+		msgChan:    make(chan *[]byte, conf.MaxMsgSize),
+		property:   make(map[string]interface{}),
+	}
+	return c
 }
 
 // Start 启动连接，让当前连接开始工作
@@ -39,7 +54,7 @@ func (c *Connection) Stop() {
 	}
 	c.CloseChan <- true
 	// 从连接管理器中删除当前连接
-	c.ConnMgr.Remove(c)
+	c.ConnMgr.closeChan <- c
 	// 关闭当前连接的管道
 	close(c.CloseChan)
 	close(c.msgChan)
@@ -56,10 +71,11 @@ func (c *Connection) GetConnID() uint64 {
 }
 
 // SendMsg 发送数据给客户端
-func (c *Connection) SendMsg(data []byte) error {
+func (c *Connection) SendMsg(msg *Message) error {
 	if c.isClosed {
 		return errors.New("connection is closed")
 	}
+	data := msg.Pack()
 	c.msgChan <- &data
 	return nil
 }
@@ -108,6 +124,7 @@ func (c *Connection) StartReader() {
 	}
 }
 
+// StartWriter 启动写协程
 func (c *Connection) StartWriter() {
 	log.Println("Writer Goroutine is running for connID:", c.ConnID, ", remote address:", c.Conn.RemoteAddr().String())
 	defer log.Println("remote address:", c.Conn.RemoteAddr().String(), "connID:", c.ConnID, "is closed")
