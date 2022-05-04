@@ -5,28 +5,28 @@ package wsmgr
 */
 type IRouter interface {
 	// Add 添加路由
-	Add(pattern string, handler IRequestHandler)
-	// Get 删除路由
-	Get(pattern string) (IRequestHandler, bool)
+	Add(pattern string, handler RequestHandler)
+	// Get 获取路由
+	Get(pattern string) (RequestHandler, bool)
 }
 
 type Router struct {
-	routes map[string]IRequestHandler
+	routes map[string]RequestHandler
 }
 
 // Add a route to the router
-func (r *Router) Add(pattern string, handler IRequestHandler) {
+func (r *Router) Add(pattern string, handler RequestHandler) {
 	r.routes[pattern] = handler
 }
 
 // Get a route from the router
-func (r *Router) Get(pattern string) (IRequestHandler, bool) {
+func (r *Router) Get(pattern string) (RequestHandler, bool) {
 	handler, ok := r.routes[pattern]
 	return handler, ok
 }
 
 func NewRouter() *Router {
 	return &Router{
-		routes: make(map[string]IRequestHandler),
+		routes: make(map[string]RequestHandler),
 	}
 }

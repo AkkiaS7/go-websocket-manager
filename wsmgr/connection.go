@@ -7,34 +7,11 @@ import (
 	"sync"
 )
 
-/*
-	Websocket连接的抽象层
-*/
-type IConnection interface {
-	// Start 启动连接，让当前连接开始工作
-	Start()
-	// Stop 停止连接，结束当前连接的工作
-	Stop()
-	// GetConnection 获取当前连接绑定的websocket连接
-	GetConnection() *websocket.Conn
-	// GetConnID 获取当前连接的ID
-	GetConnID() uint64
-	// SendMsg 发送数据给客户端
-	SendMsg(data []byte) error
-	// SetProperty 设置连接的属性
-	SetProperty(key string, value interface{})
-	// GetProperty 获取连接的属性
-	GetProperty(key string) (interface{}, error)
-	// RemoveProperty 移除连接的属性
-	RemoveProperty(key string)
-}
-
 type Connection struct {
-	Worker     IWorker         //当前链接所属的worker
 	Conn       *websocket.Conn //当前链接的Websocket连接
 	ConnID     uint64          //链接的ID
 	CloseChan  chan bool       //当前链接的关闭通知管道
-	MsgHandler IMsgHandler     //当前链接的消息管理器
+	MsgHandler *MsgHandler     //当前链接的消息管理器
 
 	isClosed     bool                   //当前链接的关闭状态
 	msgChan      chan []byte            //当前链接的消息管道
@@ -100,16 +77,7 @@ func (c *Connection) StartReader() {
 	defer c.Stop()
 	for {
 		_, data, err := c.Conn.ReadMessage()
-		if err != nil {
-			log.Println("connID:", c.ConnID, "read error:", err)
-			return
-		}
-		msg := &Msg{}
-		msg.Unmarshal(data)
-		req := &Request{
-			Conn: c,
-			Msg:  msg,
-		}
-		c.MsgHandler.SendMsgToTaskQueue(req)
+		//TODO 发送给msgHandler
+		
 	}
 }
