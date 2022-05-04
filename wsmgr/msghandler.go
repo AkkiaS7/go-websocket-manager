@@ -14,15 +14,23 @@ import (
 */
 
 type MsgHandler struct {
-	WorkerList     []*MsgWorker // Worker列表
-	WorkerPoolSize uint64       //工作池的worker数量
-	mgr            *Mgr         //隶属的websocket管理器
+	WorkerList     map[uint64]*MsgWorker // Worker列表
+	WorkerPoolSize uint64                //工作池的worker数量
+	mgr            *Mgr                  //隶属的websocket管理器
 }
 
 type MsgWorker struct {
 	ID       uint64        // worker的ID
 	mh       *MsgHandler   // 所属的消息处理器
 	ReqQueue chan *Request // 请求队列
+}
+
+func NewMsgHandler(mgr *Mgr) *MsgHandler {
+	return &MsgHandler{
+		mgr:            mgr,
+		WorkerPoolSize: conf.WorkerPoolSize,
+		WorkerList:     make(map[uint64]*MsgWorker),
+	}
 }
 
 //StartWorker 启动worker工作池
@@ -38,6 +46,7 @@ func (mh *MsgHandler) StartOneWorker(id uint64) {
 		mh:       mh,
 		ReqQueue: make(chan *Request, conf.WorkerReqQueueSize),
 	}
+	mh.WorkerList[id] = &worker
 	for {
 		select {
 		case req := <-worker.ReqQueue:
@@ -57,15 +66,13 @@ func (mh *MsgHandler) StartOneWorker(id uint64) {
 			if err := binary.Read(dataBuff, binary.LittleEndian, &cmd); err != nil {
 				log.Println("解析CMD失败：", err)
 			}
-			msg.Body = &MsgBody{
+			req.MsgBody = &MsgBody{
 				CMD:  string(cmd),
 				Data: make([]byte, msg.Header.DataLength),
 			}
 			if err := binary.Read(dataBuff, binary.LittleEndian, &msg.Body.Data); err != nil {
 				log.Println("解析Data失败：", err)
 			}
-			//构造request
-			req.Msg = msg
 			//交由RequestHandler处理
 			mh.mgr.ReqHandler.HandleRequest(req)
 			//处理完成后，返回结果

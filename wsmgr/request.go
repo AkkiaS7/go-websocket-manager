@@ -7,7 +7,7 @@ package wsmgr
 
 type Request struct {
 	Conn *Connection
-	Msg  *Message
+	*MsgBody
 
 	rawMsg *[]byte
 }

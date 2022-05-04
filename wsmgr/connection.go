@@ -8,25 +8,41 @@ import (
 )
 
 type Connection struct {
-	Conn       *websocket.Conn //当前链接的Websocket连接
-	ConnID     uint64          //链接的ID
-	CloseChan  chan bool       //当前链接的关闭通知管道
-	MsgHandler *MsgHandler     //当前链接的消息管理器
-
+	Conn         *websocket.Conn        //当前链接的Websocket连接
+	ConnID       uint64                 //链接的ID
+	CloseChan    chan bool              //当前链接的关闭通知管道
+	MsgHandler   *MsgHandler            //当前链接的消息管理器
+	ConnMgr      *ConnManager           //当前链接的管理器
 	isClosed     bool                   //当前链接的关闭状态
-	msgChan      chan []byte            //当前链接的消息管道
+	msgChan      chan *[]byte           //当前链接的消息管道
 	property     map[string]interface{} //当前链接的额外属性
 	propertyLock sync.RWMutex
 }
 
 // Start 启动连接，让当前连接开始工作
 func (c *Connection) Start() {
-	//TODO 读写协程
+	log.Println("ConnID:", c.ConnID, " start")
+	go c.StartReader()
+	go c.StartWriter()
 }
 
 // Stop 停止连接，结束当前连接的工作
 func (c *Connection) Stop() {
-	//TODO 关闭连接
+	log.Println("ConnID:", c.ConnID, " stop")
+	if c.isClosed {
+		return
+	}
+	c.isClosed = true
+	err := c.Conn.Close()
+	if err != nil {
+		return
+	}
+	c.CloseChan <- true
+	// 从连接管理器中删除当前连接
+	c.ConnMgr.Remove(c)
+	// 关闭当前连接的管道
+	close(c.CloseChan)
+	close(c.msgChan)
 }
 
 // GetConnection 获取当前连接绑定的websocket连接
@@ -41,7 +57,10 @@ func (c *Connection) GetConnID() uint64 {
 
 // SendMsg 发送数据给客户端
 func (c *Connection) SendMsg(data []byte) error {
-	//TODO 发送数据
+	if c.isClosed {
+		return errors.New("connection is closed")
+	}
+	c.msgChan <- &data
 	return nil
 }
 
@@ -86,5 +105,22 @@ func (c *Connection) StartReader() {
 			rawMsg: &data,
 		}
 		c.MsgHandler.SendToTaskQueue(req)
+	}
+}
+
+func (c *Connection) StartWriter() {
+	log.Println("Writer Goroutine is running for connID:", c.ConnID, ", remote address:", c.Conn.RemoteAddr().String())
+	defer log.Println("remote address:", c.Conn.RemoteAddr().String(), "connID:", c.ConnID, "is closed")
+	defer c.Stop()
+	for {
+		select {
+		case data := <-c.msgChan:
+			if err := c.Conn.WriteMessage(websocket.BinaryMessage, *data); err != nil {
+				log.Println("write message error:", err)
+				continue
+			}
+		case <-c.CloseChan:
+			return
+		}
 	}
 }

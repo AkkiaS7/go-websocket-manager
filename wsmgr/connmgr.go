@@ -1,40 +1,33 @@
 package wsmgr
 
 import (
+	"github.com/gorilla/websocket"
 	"sync"
 )
-
-/*
-	连接管理器的抽象层
-*/
-type IConnManager interface {
-	// Add 将连接加入连接管理器
-	Add(conn IConnection)
-	// Remove 将连接从连接管理器中删除
-	Remove(conn IConnection)
-	// Get 从连接管理器中获取连接
-	Get(connID uint64) (IConnection, error)
-}
 
 /*
 	连接管理模块的具体实现
 */
 type ConnManager struct {
-	connections map[uint64]IConnection //存放所有链接ID的map
+	connections map[uint64]*Connection //存放所有链接ID的map
 	connLock    sync.RWMutex           //读写连接的读写锁
 }
 
 // NewConnManager 创建一个链接管理模块的实例
 func NewConnManager() *ConnManager {
 	return &ConnManager{
-		connections: make(map[uint64]IConnection),
+		connections: make(map[uint64]*Connection),
 	}
 }
 
 // GetConnID
 
 // Add 添加链接
-func (cm *ConnManager) Add(conn IConnection) {
+func (cm *ConnManager) Add(wsConn *websocket.Conn) {
+	// 构造Connection实例
+	conn := &Connection{
+		Conn: wsConn,
+	}
 	cm.connLock.Lock()
 	defer cm.connLock.Unlock()
 
@@ -43,7 +36,7 @@ func (cm *ConnManager) Add(conn IConnection) {
 }
 
 // Remove 删除链接
-func (cm *ConnManager) Remove(conn IConnection) {
+func (cm *ConnManager) Remove(conn *Connection) {
 	cm.connLock.Lock()
 	defer cm.connLock.Unlock()
 
@@ -52,7 +45,7 @@ func (cm *ConnManager) Remove(conn IConnection) {
 }
 
 // Get 得到链接
-func (cm *ConnManager) Get(connID uint64) (IConnection, error) {
+func (cm *ConnManager) Get(connID uint64) (*Connection, error) {
 	cm.connLock.RLock()
 	defer cm.connLock.RUnlock()
 
