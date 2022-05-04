@@ -5,6 +5,17 @@ import (
 	"github.com/AkkiaS7/go-websocket-mgr/wsmgr/conf"
 )
 
+/*
+	消息处理器抽象层
+	用于从消息中抽出路由参数与数据交由RequestHandler处理
+*/
+type IMsgHandler interface {
+	//StartWorker 启动worker工作池
+	StartWorker(workerPoolSize int)
+	//SendMsgToTaskQueue 将消息交给TaskQueue,由worker进行处理
+	SendMsgToTaskQueue(request IRequest)
+}
+
 type MsgHandler struct {
 	TaskQueue      []chan IRequest //请求任务的消息队列
 	WorkerPoolSize uint64          //工作池的worker数量

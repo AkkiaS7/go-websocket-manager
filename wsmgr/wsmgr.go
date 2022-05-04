@@ -1,5 +1,11 @@
 package wsmgr
 
+type IMgr interface {
+	AddRouter(pattern string, handler IRequestHandler)
+	GetConnMgr() IConnManager
+	GetRouter() IRouter
+}
+
 type Mgr struct {
 	MsgHandler IMsgHandler  // 消息处理器
 	ConnMgr    IConnManager // 连接管理器

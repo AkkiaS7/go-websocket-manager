@@ -3,7 +3,6 @@ package wsmgr
 /*
 	worker的抽象层
 */
-
 type IWorker interface {
 	//Start 启动worker
 	Start()

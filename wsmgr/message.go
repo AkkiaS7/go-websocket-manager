@@ -4,6 +4,15 @@ import (
 	"encoding/json"
 )
 
+type IMessage interface {
+	GetCmd() string
+	GetData() interface{}
+	SetCmd(string)
+	SetData(interface{})
+	//Unmarshal 反序列化消息
+	Unmarshal([]byte) IMessage
+}
+
 type Msg struct {
 	Cmd  string      `json:"cmd"`
 	Data interface{} `json:"data"`
