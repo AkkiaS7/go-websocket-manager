@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 import "github.com/gorilla/websocket"
 

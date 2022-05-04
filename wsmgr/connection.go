@@ -2,18 +2,17 @@ package wsmgr
 
 import (
 	"errors"
-	"github.com/AkkiaS7/go-websocket-mgr/wsmgr/iface"
 	"github.com/gorilla/websocket"
 	"log"
 	"sync"
 )
 
 type Connection struct {
-	Worker     iface.IWorker     //当前链接所属的worker
-	Conn       *websocket.Conn   //当前链接的Websocket连接
-	ConnID     uint64            //链接的ID
-	CloseChan  chan bool         //当前链接的关闭通知管道
-	MsgHandler iface.IMsgHandler //当前链接的消息管理器
+	Worker     IWorker         //当前链接所属的worker
+	Conn       *websocket.Conn //当前链接的Websocket连接
+	ConnID     uint64          //链接的ID
+	CloseChan  chan bool       //当前链接的关闭通知管道
+	MsgHandler IMsgHandler     //当前链接的消息管理器
 
 	isClosed     bool                   //当前链接的关闭状态
 	msgChan      chan []byte            //当前链接的消息管道

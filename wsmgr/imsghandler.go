@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 /*
 	消息处理器抽象层

@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 type IMgr interface {
 	AddRouter(pattern string, handler IRequestHandler)

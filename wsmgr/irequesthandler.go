@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 type IRequestHandler interface {
 	// Handle 处理请求对应的业务

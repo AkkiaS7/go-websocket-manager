@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 /*
 	worker的抽象层

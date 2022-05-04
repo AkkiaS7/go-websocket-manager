@@ -1,18 +1,16 @@
 package wsmgr
 
-import "github.com/AkkiaS7/go-websocket-mgr/wsmgr/iface"
-
 type Request struct {
-	Conn iface.IConnection `json:"-"`
-	Msg  iface.IMessage    `json:"-"`
+	Conn IConnection `json:"-"`
+	Msg  IMessage    `json:"-"`
 }
 
 //GetConnection 获取请求连接信息
-func (r *Request) GetConnection() iface.IConnection {
+func (r *Request) GetConnection() IConnection {
 	return r.Conn
 }
 
 //GetMsg 获取请求消息数据
-func (r *Request) GetMsg() iface.IMessage {
+func (r *Request) GetMsg() IMessage {
 	return r.Msg
 }

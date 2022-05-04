@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 type IMessage interface {
 	GetCmd() string

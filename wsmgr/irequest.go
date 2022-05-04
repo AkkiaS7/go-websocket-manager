@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 /*
 	从消息中分离路由信息与请求信息

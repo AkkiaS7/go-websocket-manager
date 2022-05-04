@@ -1,4 +1,4 @@
-package iface
+package wsmgr
 
 /*
 	连接管理器的抽象层

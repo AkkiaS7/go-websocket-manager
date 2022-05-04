@@ -1,24 +1,22 @@
 package wsmgr
 
-import "github.com/AkkiaS7/go-websocket-mgr/wsmgr/iface"
-
 type Router struct {
-	routes map[string]iface.IRequestHandler
+	routes map[string]IRequestHandler
 }
 
 // Add a route to the router
-func (r *Router) Add(pattern string, handler iface.IRequestHandler) {
+func (r *Router) Add(pattern string, handler IRequestHandler) {
 	r.routes[pattern] = handler
 }
 
 // Get a route from the router
-func (r *Router) Get(pattern string) (iface.IRequestHandler, bool) {
+func (r *Router) Get(pattern string) (IRequestHandler, bool) {
 	handler, ok := r.routes[pattern]
 	return handler, ok
 }
 
 func NewRouter() *Router {
 	return &Router{
-		routes: make(map[string]iface.IRequestHandler),
+		routes: make(map[string]IRequestHandler),
 	}
 }

@@ -2,7 +2,6 @@ package wsmgr
 
 import (
 	"encoding/json"
-	"github.com/AkkiaS7/go-websocket-mgr/wsmgr/iface"
 )
 
 type Msg struct {
@@ -24,7 +23,7 @@ func (m *Msg) SetData(data interface{}) {
 }
 
 //Unmarshal 反序列化消息
-func (m *Msg) Unmarshal(data []byte) iface.IMessage {
+func (m *Msg) Unmarshal(data []byte) IMessage {
 	err := json.Unmarshal(data, m)
 	if err != nil {
 		return nil
