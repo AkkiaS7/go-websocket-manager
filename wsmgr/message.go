@@ -1,15 +1,16 @@
 package wsmgr
 
 type Message struct {
-	Header
+	Header *MsgHeader
+	Body   *MsgBody
 }
 
-type Header struct {
+type MsgHeader struct {
 	CMDLength  uint16
 	DataLength uint32
 }
 
-type Body struct {
+type MsgBody struct {
 	CMD  string
 	Data []byte
 }

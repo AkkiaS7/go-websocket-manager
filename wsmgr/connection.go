@@ -77,7 +77,14 @@ func (c *Connection) StartReader() {
 	defer c.Stop()
 	for {
 		_, data, err := c.Conn.ReadMessage()
-		//TODO 发送给msgHandler
-		
+		if err != nil {
+			log.Println("read message error:", err)
+			continue
+		}
+		req := &Request{
+			Conn:   c,
+			rawMsg: &data,
+		}
+		c.MsgHandler.SendToTaskQueue(req)
 	}
 }
