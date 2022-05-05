@@ -3,12 +3,11 @@ package main
 import (
 	"github.com/AkkiaS7/go-websocket-mgr/wsmgr"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/websocket"
 	"log"
 )
 
 var (
-	upgrader = websocket.Upgrader{}
+	upgrader = wsmgr.Upgrader{}
 )
 
 func main() {

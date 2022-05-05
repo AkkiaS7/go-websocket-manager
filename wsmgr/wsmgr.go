@@ -22,7 +22,3 @@ func (mgr *Mgr) Start() {
 	go mgr.ReqHandler.Start()
 	go mgr.ConnMgr.Start()
 }
-
-func (mgr *Mgr) Send(conn *Connection, msg *Message) {
-
-}
