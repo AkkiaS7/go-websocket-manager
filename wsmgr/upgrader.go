@@ -11,5 +11,5 @@ func (u *Upgrader) Upgrade(w http.ResponseWriter, r *http.Request, responseHeade
 	upgrader := new(websocket.Upgrader)
 	upgrader = (*websocket.Upgrader)(u)
 	return upgrader.Upgrade(w, r, responseHeader)
-	//TODO upgrader后直接在连接管理器中添加连接
+	//TODO upgrade后直接在连接管理器中添加连接
 }
